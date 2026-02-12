@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Petals Magazine — by Gülçiçek</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.9/babel.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,wght@0,400;0,500;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html,body,#root{width:100%;height:100%;overflow:hidden}
+::selection{background:#1B3D2F;color:#fff}
+::-webkit-scrollbar{width:5px}
+::-webkit-scrollbar-track{background:#F5F0EB}
+::-webkit-scrollbar-thumb{background:#C0BDB8;border-radius:3px}
+img{-webkit-user-drag:none;user-select:none}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const { useState, useEffect, useRef } = React;
+
+const C = {
+  green: "#1B3D2F",
+  greenDeep: "#122A20",
+  greenLight: "#2D5E48",
+  greenMuted: "#4A7D66",
+  gold: "#C4A35A",
+  goldLight: "#D4B978",
+  cream: "#F5F0EB",
+  warmWhite: "#FAF8F5",
+  offWhite: "#EEEAE4",
+  charcoal: "#2C2C2C",
+  grey: "#8A8A8A",
+  greyLight: "#C0BDB8",
+  white: "#FFFFFF",
+};
+
+const ARTICLES = [
+  { id:1, t:"Tobacco: Memory & Ritual in Perfumery", cat:"Ingredients", issue:39, img:"photo-1559825481-12a05cc00344", sub:"From sacred smoke to synthetic molecule, tobacco's paradox endures.", featured:true },
+  { id:2, t:"The Coconut Illusion", cat:"Science", issue:39, img:"photo-1501443762994-82bd5dace89a", sub:"Why your brain lies about lactones." },
+  { id:3, t:"Istanbul to Grasse: A Fragrance Corridor", cat:"Culture", issue:39, img:"photo-1524231757912-21f4fe3a7200", sub:"The ancient rose road, still breathing." },
+  { id:4, t:"Biodiversity in the Bottle", cat:"Sustainability", issue:39, img:"photo-1441974231531-c6227db76b6e", sub:"What happens when the source disappears?", featured:true },
+  { id:5, t:"AI Meets the Nose", cat:"Innovation", issue:39, img:"photo-1518770660439-4636190af475", sub:"Machine learning in the perfumer's lab." },
+  { id:6, t:"Vetiver: Earth's Signature", cat:"Ingredients", issue:39, img:"photo-1416879595882-3373a0480b5b", sub:"The roots beneath everything." },
+  { id:7, t:"The New Orientalism", cat:"Culture", issue:38, img:"photo-1541643600914-78b084683601", sub:"Rewriting the olfactive East." },
+  { id:8, t:"Nabil Achour, Nose", cat:"Profiles", issue:38, img:"photo-1547887538-e3a2f32cb1cc", sub:"A perfumer between two continents.", featured:true },
+  { id:9, t:"Synthetic vs Natural: The Eternal Debate", cat:"Innovation", issue:38, img:"photo-1588405748880-12d1d2a59f75", sub:"Where chemistry meets philosophy." },
+  { id:10, t:"Myrrh: Ancient Tears", cat:"Ingredients", issue:37, img:"photo-1595425964272-fc617fa19dfa", sub:"Resin, ritual, and revival." },
+  { id:11, t:"Scent & Memory: The Proust Effect", cat:"Culture", issue:37, img:"photo-1563170351-be82bc888aa4", sub:"How a molecule unlocks a lifetime." },
+  { id:12, t:"Green Chemistry 2025", cat:"Innovation", issue:37, img:"photo-1615634260167-c8cdede054de", sub:"Lab-grown ingredients are here to stay." },
+  { id:13, t:"The Rose Harvest", cat:"Culture", issue:36, img:"photo-1490750967868-88aa4f44baee", sub:"Isparta at dawn: 4,000 kilos before noon." },
+  { id:14, t:"Amber Reconstructed", cat:"Science", issue:36, img:"photo-1507003211169-0a1dd7228f2d", sub:"The molecule that doesn't exist in nature." },
+];
+
+const ISSUES = Array.from({length:39},(_,i)=>({
+  num:39-i,
+  img:["photo-1615634260167-c8cdede054de","photo-1541643600914-78b084683601","photo-1588405748880-12d1d2a59f75","photo-1595425964272-fc617fa19dfa","photo-1547887538-e3a2f32cb1cc","photo-1563170351-be82bc888aa4"][i%6],
+}));
+
+function FloatCard({ children, delay=0, style={} }) {
+  const [vis, setVis] = useState(false);
+  const ref = useRef(null);
+  useEffect(() => {
+    const obs = new IntersectionObserver(([e]) => { if(e.isIntersecting) setVis(true); }, { threshold:0.12 });
+    if(ref.current) obs.observe(ref.current);
+    return () => obs.disconnect();
+  }, []);
+  return React.createElement("div", {
+    ref,
+    style: {
+      opacity: vis ? 1 : 0,
+      transform: vis ? "translateY(0)" : "translateY(40px)",
+      transition: `opacity 0.8s cubic-bezier(0.16,1,0.3,1) ${delay}s, transform 0.8s cubic-bezier(0.16,1,0.3,1) ${delay}s`,
+      ...style,
+    }
+  }, children);
+}
+
+function LiftCard({ children, style={}, onClick }) {
+  const [hov, setHov] = useState(false);
+  return (
+    <div
+      onClick={onClick}
+      onMouseEnter={() => setHov(true)}
+      onMouseLeave={() => setHov(false)}
+      style={{
+        transform: hov ? "translateY(-8px)" : "translateY(0)",
+        boxShadow: hov ? "0 24px 48px rgba(27,61,47,0.12)" : "0 4px 16px rgba(27,61,47,0.06)",
+        transition: "all 0.5s cubic-bezier(0.16,1,0.3,1)",
+        cursor: onClick ? "pointer" : "default",
+        ...style,
+      }}
+    >{children}</div>
+  );
+}
+
+function Nav({ view, setView, scrollY }) {
+  const solid = scrollY > 80;
+  return (
+    <nav style={{
+      position:"fixed", top:0, left:0, right:0, zIndex:999,
+      padding:"0 48px", height:68,
+      display:"flex", alignItems:"center", justifyContent:"space-between",
+      background: solid ? "rgba(245,240,235,0.96)" : "transparent",
+      backdropFilter: solid ? "blur(20px)" : "none",
+      borderBottom: solid ? "1px solid rgba(27,61,47,0.06)" : "none",
+      transition:"all 0.4s ease",
+    }}>
+      <div onClick={()=>setView("home")} style={{cursor:"pointer",display:"flex",alignItems:"baseline",gap:10}}>
+        <span style={{fontFamily:"'Bodoni Moda','Didot',Georgia,serif",fontSize:26,fontWeight:400,letterSpacing:"0.06em",color:C.green,textTransform:"uppercase"}}>Petals</span>
+        <span style={{fontFamily:"'DM Sans',Helvetica,sans-serif",fontSize:9,color:C.grey,letterSpacing:"0.15em",textTransform:"uppercase",borderLeft:"1px solid "+C.greyLight,paddingLeft:10,marginLeft:2}}>by Gülçiçek</span>
+      </div>
+      <div style={{display:"flex",gap:32,alignItems:"center"}}>
+        {[{k:"home",l:"Journal"},{k:"issues",l:"Issues"},{k:"pages",l:"Pages"}].map(n=>(
+          <span key={n.k} onClick={()=>setView(n.k)} style={{
+            fontFamily:"'DM Sans',Helvetica,sans-serif",fontSize:11,letterSpacing:"0.1em",textTransform:"uppercase",
+            color:view===n.k?C.green:C.grey,cursor:"pointer",transition:"color 0.3s",
+            borderBottom:view===n.k?"1.5px solid "+C.green:"1.5px solid transparent",paddingBottom:4,
+          }}>{n.l}</span>
+        ))}
+        <a href="https://gulcicek.com" target="_blank" rel="noopener" style={{fontFamily:"'DM Sans',Helvetica,sans-serif",fontSize:10,color:C.greenLight,textDecoration:"none",letterSpacing:"0.08em"}}>gulcicek.com ↗</a>
+      </div>
+    </nav>
+  );
+}
+
+function Home({ goDetail }) {
+  const [entered, setEntered] = useState(false);
+  useEffect(() => { setTimeout(()=>setEntered(true), 100); }, []);
+
+  return (
+    <div style={{ background:C.cream }}>
+      <section style={{height:"100vh",position:"relative",overflow:"hidden",background:C.green}}>
+        <div style={{position:"absolute",inset:0,backgroundImage:"url(https://images.unsplash.com/photo-1559825481-12a05cc00344?w=1800&h=1000&fit=crop)",backgroundSize:"cover",backgroundPosition:"center 30%",opacity:entered?0.35:0,transition:"opacity 2s ease"}}/>
+        <svg style={{position:"absolute",right:-60,bottom:-60,opacity:0.04,width:500,height:500}} viewBox="0 0 200 200"><path d="M100,10 Q140,50 130,100 Q120,150 100,190 Q80,150 70,100 Q60,50 100,10Z" fill="white"/><path d="M100,10 L100,190" stroke="white" strokeWidth="0.5" fill="none"/></svg>
+        <div style={{position:"absolute",bottom:0,left:0,right:0,height:"50%",background:"linear-gradient(transparent,"+C.green+")"}}/>
+        <div style={{position:"relative",zIndex:2,height:"100%",display:"flex",flexDirection:"column",justifyContent:"flex-end",padding:"0 48px 80px",opacity:entered?1:0,transform:entered?"translateY(0)":"translateY(50px)",transition:"all 1.2s cubic-bezier(0.16,1,0.3,1) 0.3s"}}>
+          <div style={{fontFamily:"'DM Sans',Helvetica,sans-serif",fontSize:11,letterSpacing:"0.25em",textTransform:"uppercase",color:C.goldLight,marginBottom:24}}>Issue No. 39 · Winter 2025</div>
+          <h1 style={{fontFamily:"'Bodoni Moda','Didot',Georgia,serif",fontSize:"clamp(52px, 7vw, 96px)",fontWeight:400,color:C.white,margin:0,lineHeight:1.0,letterSpacing:"-0.02em"}}>Tobacco: Memory<br/>& Ritual</h1>
+          <p style={{fontFamily:"'DM Sans',Helvetica,sans-serif",fontSize:14,color:"rgba(255,255,255,0.5)",marginTop:24,maxWidth:450,lineHeight:1.7}}>From sacred smoke to synthetic molecule. Our lead story traces perfumery's most paradoxical note.</p>
+          <div onClick={()=>goDetail(ARTICLES[0])} style={{marginTop:36,display:"inline-flex",alignItems:"center",gap:12,cursor:"pointer"}}>
+            <span style={{fontFamily:"'DM Sans',Helvetica,sans-serif",fontSize:12,letterSpacing:"0.12em",textTransform:"uppercase",color:C.goldLight,borderBottom:"1px solid "+C.goldLight,paddingBottom:4}}>Read the story</span>
+            <span style={{color:C.goldLight,fontSize:16}}>→</span>
+          </div>
+        </div>
+      </section>
+
+      <section style={{padding:"100px 48px"}}>
+        <FloatCard>
+          <div style={{fontFamily:"'DM Sans'",fontSize:11,letterSpacing:"0.2em",textTransform:"uppercase",color:C.gold,marginBottom:16}}>From the Journal</div>
+          <h2 style={{fontFamily:"'Bodoni Moda','Didot',Georgia,serif",fontSize:44,fontWeight:400,color:C.green,margin:"0 0 56px",letterSpacing:"-0.01em"}}>Latest Stories</h2>
+        </FloatCard>
+        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:32}}>
+          <FloatCard delay={0.1}>
+            <LiftCard onClick={()=>goDetail(ARTICLES[0])} style={{background:C.white,overflow:"hidden"}}>
+              <div style={{overflow:"hidden"}}><img src={"https://images.unsplash.com/"+ARTICLES[0].img+"?w=900&h=600&fit=crop"} alt="" style={{width:"100%",height:400,objectFit:"cover",display:"block",transition:"transform 0.7s ease"}} onMouseEnter={e=>e.target.style.transform="scale(1.04)"} onMouseLeave={e=>e.target.style.transform="scale(1)"}/></div>
+              <div style={{padding:"28px 28px 32px"}}>
+                <div style={{fontFamily:"'DM Sans'",fontSize:10,letterSpacing:"0.15em",textTransform:"uppercase",color:C.gold,marginBottom:10}}>{ARTICLES[0].cat} · No.{ARTICLES[0].issue}</div>
+                <h3 style={{fontFamily:"'Bodoni Moda','Didot',Georgia,serif",fontSize:28,fontWeight:400,color:C.charcoal,margin:"0 0 10px",lineHeight:1.2}}>{ARTICLES[0].t}</h3>
+                <p style={{fontFamily:"'DM Sans'",fontSize:13,color:C.grey,margin:0,lineHeight:1.6}}>{ARTICLES[0].sub}</p>
+              </div>
+            </LiftCard>
+          </FloatCard>
+          <div style={{display:"flex",flexDirection:"column",gap:24}}>
+            {ARTICLES.slice(1,4).map((a,i) => (
+              <FloatCard key={a.id} delay={0.15+i*0.1}>
+                <LiftCard onClick={()=>goDetail(a)} style={{background:C.white,display:"grid",gridTemplateColumns:"180px 1fr",overflow:"hidden"}}>
+                  <img src={"https://images.unsplash.com/"+a.img+"?w=360&h=280&fit=crop"} alt="" style={{width:"100%",height:"100%",objectFit:"cover",display:"block"}}/>
+                  <div style={{padding:"20px 24px",display:"flex",flexDirection:"column",justifyContent:"center"}}>
+                    <div style={{fontFamily:"'DM Sans'",fontSize:9,letterSpacing:"0.15em",textTransform:"uppercase",color:C.gold,marginBottom:8}}>{a.cat}</div>
+                    <h4 style={{fontFamily:"'Bodoni Moda','Didot',Georgia,serif",fontSize:19,fontWeight:400,color:C.charcoal,margin:"0 0 6px",lineHeight:1.25}}>{a.t}</h4>
+                    <p style={{fontFamily:"'DM Sans'",fontSize:12,color:C.grey,margin:0,lineHeight:1.5}}>{a.sub}</p>
+                  </div>
+                </LiftCard>
+              </FloatCard>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <FloatCard>
+        <section style={{position:"relative",overflow:"hidden",height:420,background:C.green}}>
+          <img src="https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=1800&h=600&fit=crop" alt="" style={{width:"100%",height:"100%",objectFit:"cover",opacity:0.3,position:"absolute",inset:0}}/>
+          <svg style={{position:"absolute",left:-40,top:-40,opacity:0.05,width:300,height:300}} viewBox="0 0 200 200"><path d="M100,10 Q140,50 130,100 Q120,150 100,190 Q80,150 70,100 Q60,50 100,10Z" fill="white"/></svg>
+          <div style={{position:"relative",zIndex:2,height:"100%",display:"flex",flexDirection:"column",justifyContent:"center",padding:"0 48px",maxWidth:700}}>
+            <div style={{fontFamily:"'DM Sans'",fontSize:11,letterSpacing:"0.2em",textTransform:"uppercase",color:C.goldLight,marginBottom:20}}>Sustainability</div>
+            <h2 style={{fontFamily:"'Bodoni Moda','Didot',Georgia,serif",fontSize:48,fontWeight:400,color:C.white,margin:"0 0 20px",lineHeight:1.1}}>Biodiversity<br/>in the Bottle</h2>
+            <p style={{fontFamily:"'DM Sans'",fontSize:14,color:"rgba(255,255,255,0.55)",margin:"0 0 28px",lineHeight:1.7,maxWidth:420}}>What happens when the ecosystems fragrance depends on begin to disappear? A deep investigation.</p>
+            <span onClick={()=>goDetail(ARTICLES[3])} style={{fontFamily:"'DM Sans'",fontSize:12,letterSpacing:"0.12em",textTransform:"uppercase",color:C.goldLight,cursor:"pointer",display:"inline-flex",alignItems:"center",gap:10}}>Read more <span style={{display:"inline-block",width:32,height:1,background:C.goldLight}}/></span>
+          </div>
+        </section>
+      </FloatCard>
+
+      <section style={{padding:"100px 48px"}}>
+        <FloatCard><h2 style={{fontFamily:"'Bodoni Moda','Didot',Georgia,serif",fontSize:38,fontWeight:400,color:C.green,margin:"0 0 48px"}}>More Stories</h2></FloatCard>
+        <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:28}}>
+          {ARTICLES.slice(4,10).map((a,i) => (
+            <FloatCard key={a.id} delay={i*0.08}>
+              <LiftCard onClick={()=>goDetail(a)} style={{background:C.white,overflow:"hidden"}}>
+                <div style={{overflow:"hidden"}}><img src={"https://images.unsplash.com/"+a.img+"?w=600&h=400&fit=crop"} alt="" style={{width:"100%",height:220,objectFit:"cover",display:"block",transition:"transform 0.6s ease"}} onMouseEnter={e=>e.target.style.transform="scale(1.04)"} onMouseLeave={e=>e.target.style.transform="scale(1)"}/></div>
+                <div style={{padding:"22px 22px 26px"}}>
+                  <div style={{fontFamily:"'DM Sans'",fontSize:9,letterSpacing:"0.15em",textTransform:"uppercase",color:C.gold,marginBottom:8}}>{a.cat} · No.{a.issue}</div>
+                  <h3 style={{fontFamily:"'Bodoni Moda','Didot',Georgia,serif",fontSize:21,fontWeight:400,color:C.charcoal,margin:"0 0 8px",lineHeight:1.25}}>{a.t}</h3>
+                  <p style={{fontFamily:"'DM Sans'",fontSize:12,color:C.grey,margin:0,lineHeight:1.5}}>{a.sub}</p>
+                </div>
+              </LiftCard>
+            </FloatCard>
+          ))}
+        </div>
+      </section>
+
+      <FloatCard>
+        <section style={{margin:"0 48px",position:"relative",overflow:"hidden",height:320,background:C.greenDeep,display:"flex",alignItems:"center",justifyContent:"space-between",padding:"0 64px"}}>
+          <div style={{position:"absolute",inset:0,background:"linear-gradient(135deg, rgba(27,61,47,0.95), rgba(18,42,32,0.85))"}}/>
+          <svg style={{position:"absolute",right:40,bottom:-20,opacity:0.06,width:250,height:250}} viewBox="0 0 200 200"><path d="M100,10 Q140,50 130,100 Q120,150 100,190 Q80,150 70,100 Q60,50 100,10Z" fill="white"/><path d="M100,10 L100,190" stroke="white" strokeWidth="0.5" fill="none"/></svg>
+          <div style={{position:"relative",zIndex:2}}>
+            <div style={{fontFamily:"'Bodoni Moda','Didot',Georgia,serif",fontSize:56,fontWeight:400,color:C.white,lineHeight:1.05,letterSpacing:"-0.02em"}}>39 Issues.<br/><span style={{color:C.goldLight}}>Since 2010.</span></div>
+            <p style={{fontFamily:"'DM Sans'",fontSize:13,color:"rgba(255,255,255,0.45)",marginTop:16,maxWidth:360,lineHeight:1.6}}>Explore 15 years of fragrance journalism. Every issue, every story, preserved.</p>
+          </div>
+          <span style={{position:"relative",zIndex:2,fontFamily:"'DM Sans'",fontSize:12,letterSpacing:"0.12em",textTransform:"uppercase",color:C.goldLight,cursor:"pointer",border:"1px solid "+C.goldLight,padding:"14px 28px",transition:"all 0.3s"}}>Browse Archive →</span>
+        </section>
+      </FloatCard>
+
+      <section style={{padding:"100px 48px 60px"}}>
+        <FloatCard>
+          <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-end",marginBottom:48}}>
+            <div>
+              <div style={{fontFamily:"'DM Sans'",fontSize:11,letterSpacing:"0.2em",textTransform:"uppercase",color:C.gold,marginBottom:12}}>Archive</div>
+              <h2 style={{fontFamily:"'Bodoni Moda','Didot',Georgia,serif",fontSize:38,fontWeight:400,color:C.green,margin:0}}>Recent Issues</h2>
+            </div>
+          </div>
+        </FloatCard>
+        <div style={{display:"grid",gridTemplateColumns:"repeat(6,1fr)",gap:20}}>
+          {ISSUES.slice(0,6).map((iss,i) => (
+            <FloatCard key={iss.num} delay={i*0.08}>
+              <LiftCard style={{overflow:"hidden"}}>
+                <div style={{position:"relative",overflow:"hidden"}}>
+                  <img src={"https://images.unsplash.com/"+iss.img+"?w=400&h=560&fit=crop"} alt="" style={{width:"100%",aspectRatio:"5/7",objectFit:"cover",display:"block",transition:"transform 0.6s ease"}} onMouseEnter={e=>e.target.style.transform="scale(1.04)"} onMouseLeave={e=>e.target.style.transform="scale(1)"}/>
+                  <div style={{position:"absolute",inset:0,display:"flex",alignItems:"center",justifyContent:"center",background:"rgba(27,61,47,0.15)"}}>
+                    <span style={{fontFamily:"'Bodoni Moda','Didot',Georgia,serif",fontSize:64,fontWeight:400,color:"rgba(255,255,255,0.15)"}}>{iss.num}</span>
+                  </div>
+                </div>
+                <div style={{padding:"14px 14px 18px",background:C.white}}>
+                  <span style={{fontFamily:"'DM Sans'",fontSize:10,color:C.grey,letterSpacing:"0.1em",textTransform:"uppercase"}}>Issue No. {iss.num}</span>
+                </div>
+              </LiftCard>
+            </FloatCard>
+          ))}
+        </div>
+      </section>
+
+      <section style={{padding:"60px 48px 100px"}}>
+        <FloatCard><h2 style={{fontFamily:"'Bodoni Moda','Didot',Georgia,serif",fontSize:32,fontWeight:400,color:C.green,margin:"0 0 40px"}}>From the Archive</h2></FloatCard>
+        <div style={{display:"flex",flexDirection:"column"}}>
+          {ARTICLES.slice(6).map((a,i) => (
+            <FloatCard key={a.id} delay={i*0.06}>
+              <div onClick={()=>goDetail(a)} style={{display:"grid",gridTemplateColumns:"48px 1fr 80px",gap:28,padding:"28px 0",borderTop:"1px solid rgba(27,61,47,0.08)",cursor:"pointer",alignItems:"center",transition:"background 0.3s"}} onMouseEnter={e=>e.currentTarget.style.background="rgba(27,61,47,0.02)"} onMouseLeave={e=>e.currentTarget.style.background="transparent"}>
+                <span style={{fontFamily:"'Bodoni Moda','Didot',Georgia,serif",fontSize:28,color:C.greyLight,fontWeight:400}}>{String(i+7).padStart(2,"0")}</span>
+                <div>
+                  <div style={{fontFamily:"'DM Sans'",fontSize:9,letterSpacing:"0.15em",textTransform:"uppercase",color:C.gold,marginBottom:6}}>{a.cat} · Issue {a.issue}</div>
+                  <h4 style={{fontFamily:"'Bodoni Moda','Didot',Georgia,serif",fontSize:22,fontWeight:400,color:C.charcoal,margin:"0 0 4px",lineHeight:1.2}}>{a.t}</h4>
+                  <p style={{fontFamily:"'DM Sans'",fontSize:12,color:C.grey,margin:0}}>{a.sub}</p>
+                </div>
+                <span style={{fontSize:20,color:C.greenLight,justifySelf:"end"}}>→</span>
+              </div>
+            </FloatCard>
+          ))}
+        </div>
+      </section>
+
+      <Footer/>
+    </div>
+  );
+}
+
+function IssuesPage() {
+  return (
+    <div style={{background:C.cream,minHeight:"100vh",paddingTop:100}}>
+      <div style={{padding:"0 48px 48px"}}>
+        <div style={{fontFamily:"'DM Sans'",fontSize:11,letterSpacing:"0.2em",textTransform:"uppercase",color:C.gold,marginBottom:12}}>Archive</div>
+        <h1 style={{fontFamily:"'Bodoni Moda','Didot',Georgia,serif",fontSize:52,fontWeight:400,color:C.green,margin:"0 0 8px"}}>All Issues</h1>
+        <p style={{fontFamily:"'DM Sans'",fontSize:13,color:C.grey,margin:0}}>39 issues · 2010 – 2025</p>
+      </div>
+      <div style={{padding:"0 48px 100px",display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(180px,1fr))",gap:20}}>
+        {ISSUES.map((iss,i) => (
+          <FloatCard key={iss.num} delay={Math.min(i*0.04,0.6)}>
+            <LiftCard style={{overflow:"hidden"}}>
+              <div style={{position:"relative"}}><img src={"https://images.unsplash.com/"+iss.img+"?w=360&h=500&fit=crop"} alt="" style={{width:"100%",aspectRatio:"5/7",objectFit:"cover",display:"block"}}/><div style={{position:"absolute",inset:0,display:"flex",alignItems:"center",justifyContent:"center",background:"rgba(27,61,47,0.1)"}}><span style={{fontFamily:"'Bodoni Moda'",fontSize:56,color:"rgba(255,255,255,0.12)"}}>{iss.num}</span></div></div>
+              <div style={{padding:"12px 14px 16px",background:C.white}}><span style={{fontFamily:"'DM Sans'",fontSize:10,color:C.grey,letterSpacing:"0.1em",textTransform:"uppercase"}}>No. {iss.num}</span></div>
+            </LiftCard>
+          </FloatCard>
+        ))}
+      </div>
+      <Footer/>
+    </div>
+  );
+}
+
+function PagesView() {
+  const [sel, setSel] = useState(null);
+  const imgs=["photo-1615634260167-c8cdede054de","photo-1541643600914-78b084683601","photo-1588405748880-12d1d2a59f75","photo-1595425964272-fc617fa19dfa","photo-1547887538-e3a2f32cb1cc","photo-1563170351-be82bc888aa4","photo-1559825481-12a05cc00344","photo-1501443762994-82bd5dace89a","photo-1524231757912-21f4fe3a7200","photo-1441974231531-c6227db76b6e","photo-1518770660439-4636190af475","photo-1416879595882-3373a0480b5b"];
+  return (
+    <div style={{background:C.cream,minHeight:"100vh",paddingTop:100}}>
+      <div style={{padding:"0 48px 48px",display:"flex",justifyContent:"space-between",alignItems:"flex-end"}}>
+        <div>
+          <div style={{fontFamily:"'DM Sans'",fontSize:11,letterSpacing:"0.2em",textTransform:"uppercase",color:C.gold,marginBottom:12}}>Original Pages</div>
+          <h1 style={{fontFamily:"'Bodoni Moda','Didot',Georgia,serif",fontSize:52,fontWeight:400,color:C.green,margin:"0 0 8px"}}>Issue 39</h1>
+          <p style={{fontFamily:"'DM Sans'",fontSize:13,color:C.grey,margin:0}}>84 pages · Click to enlarge</p>
+        </div>
+        <select style={{fontFamily:"'DM Sans'",fontSize:11,background:C.white,color:C.charcoal,border:"1px solid "+C.greyLight,padding:"10px 16px",letterSpacing:"0.05em"}}>{[39,38,37,36,35].map(n=><option key={n}>Issue {n}</option>)}</select>
+      </div>
+      <div style={{padding:"0 48px 100px",display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(150px,1fr))",gap:12}}>
+        {Array.from({length:24},(_,i)=>(
+          <FloatCard key={i} delay={Math.min(i*0.03,0.5)}>
+            <LiftCard onClick={()=>setSel(i===sel?null:i)} style={{overflow:"hidden"}}>
+              <div style={{position:"relative"}}><img src={"https://images.unsplash.com/"+imgs[i%12]+"?w=300&h=420&fit=crop&q=80"} alt="" style={{width:"100%",aspectRatio:"5/7",objectFit:"cover",display:"block"}}/><div style={{position:"absolute",bottom:8,right:8,background:"rgba(27,61,47,0.7)",color:C.white,padding:"3px 8px",fontFamily:"'DM Sans'",fontSize:9,letterSpacing:"0.05em"}}>{String(i+1).padStart(2,"0")}</div></div>
+            </LiftCard>
+          </FloatCard>
+        ))}
+      </div>
+      {sel!==null&&(
+        <div onClick={()=>setSel(null)} style={{position:"fixed",inset:0,zIndex:9999,background:"rgba(27,61,47,0.95)",display:"flex",alignItems:"center",justifyContent:"center",cursor:"zoom-out"}}>
+          <img src={"https://images.unsplash.com/"+imgs[sel%12]+"?w=900&h=1260&fit=crop&q=90"} alt="" style={{maxHeight:"92vh",maxWidth:"90vw",objectFit:"contain",boxShadow:"0 0 80px rgba(0,0,0,0.3)"}}/>
+          <div style={{position:"absolute",bottom:32,fontFamily:"'DM Sans'",fontSize:12,color:"rgba(255,255,255,0.4)",letterSpacing:"0.1em"}}>Page {sel+1} / 84</div>
+        </div>
+      )}
+      <Footer/>
+    </div>
+  );
+}
+
+function Detail({ article, onBack }) {
+  const [entered,setEntered]=useState(false);
+  useEffect(()=>{setTimeout(()=>setEntered(true),100);},[]);
+  if(!article) return null;
+  return (
+    <div style={{background:C.cream}}>
+      <section style={{height:"75vh",position:"relative",overflow:"hidden"}}>
+        <img src={"https://images.unsplash.com/"+article.img+"?w=1800&h=1000&fit=crop"} alt="" style={{width:"100%",height:"100%",objectFit:"cover",opacity:entered?1:0.3,transition:"opacity 1.5s ease"}}/>
+        <div style={{position:"absolute",bottom:0,left:0,right:0,padding:"160px 48px 60px",background:"linear-gradient(transparent, rgba(27,61,47,0.9))"}}>
+          <div style={{opacity:entered?1:0,transform:entered?"translateY(0)":"translateY(30px)",transition:"all 1s ease 0.3s"}}>
+            <div style={{display:"flex",gap:12,alignItems:"center",marginBottom:18}}>
+              <span style={{fontFamily:"'DM Sans'",fontSize:10,letterSpacing:"0.2em",textTransform:"uppercase",color:C.goldLight}}>{article.cat}</span>
+              <span style={{color:"rgba(255,255,255,0.3)"}}>·</span>
+              <span style={{fontFamily:"'DM Sans'",fontSize:10,letterSpacing:"0.15em",textTransform:"uppercase",color:"rgba(255,255,255,0.4)"}}>Issue {article.issue}</span>
+            </div>
+            <h1 style={{fontFamily:"'Bodoni Moda','Didot',Georgia,serif",fontSize:"clamp(36px,5vw,64px)",fontWeight:400,color:C.white,margin:0,lineHeight:1.1,maxWidth:"60vw"}}>{article.t}</h1>
+          </div>
+        </div>
+        <div onClick={onBack} style={{position:"absolute",top:84,left:48,zIndex:10,fontFamily:"'DM Sans'",fontSize:11,color:"rgba(255,255,255,0.5)",cursor:"pointer",letterSpacing:"0.08em",display:"flex",alignItems:"center",gap:8}}><span>←</span> Back</div>
+      </section>
+      <section style={{padding:"80px 48px",maxWidth:700,margin:"0 auto"}}>
+        <p style={{fontFamily:"'Bodoni Moda','Didot',Georgia,serif",fontSize:22,lineHeight:1.6,color:C.charcoal,margin:"0 0 44px",fontStyle:"italic"}}>{article.sub}</p>
+        <div style={{width:48,height:1.5,background:C.gold,marginBottom:44}}/>
+        {["The scent of tobacco is one of perfumery's great paradoxes: at once warm and cool, sweet and bitter, comforting and unsettling. It carries the weight of ritual; the pipe after dinner, the ceremonial offering, the quiet moment of reflection. For perfumers, it is a note that bridges the gap between the natural and the imagined.","In the gardens of 17th century Istanbul, tobacco was not merely consumed but celebrated. The Ottoman tobacco ritual, with its elaborate pipes and social ceremonies, created an olfactive landscape that perfumers would later seek to capture in glass bottles. The smoky sweetness, the honeyed warmth, the leathery depth: these are the memories encoded in the molecule.","Modern tobacco accords rely on a carefully orchestrated symphony of molecules. At the heart lies coumarin, the compound responsible for that distinctive hay-like sweetness. Around it, perfumers layer vanillin for warmth, iso-quinoline for the smoky bite, and various musks for the lingering trail that makes tobacco fragrances so addictive."].map((txt,i)=>(
+          <p key={i} style={{fontFamily:"'DM Sans'",fontSize:15,lineHeight:1.9,color:"rgba(44,44,44,0.8)",margin:"0 0 28px"}}>{txt}</p>
+        ))}
+        <div style={{margin:"56px -48px",overflow:"hidden"}}><img src="https://images.unsplash.com/photo-1501443762994-82bd5dace89a?w=1600&h=500&fit=crop" alt="" style={{width:"100%",height:360,objectFit:"cover"}}/></div>
+        <h2 style={{fontFamily:"'Bodoni Moda','Didot',Georgia,serif",fontSize:32,fontWeight:400,color:C.green,margin:"0 0 28px"}}>The Molecular Architecture</h2>
+        {["What makes tobacco so compelling in perfumery is its ability to evoke specific memories. The Proustian effect of a tobacco note can transport the wearer to a grandfather's study, a Havana street, or an autumn evening by the fire. It is this emotional resonance that keeps tobacco at the heart of fragrance creation.","The challenge for modern perfumers lies in recreation without reproduction. Natural tobacco absolute, while beautiful, carries regulatory restrictions. The art is in constructing a tobacco accord that feels authentic while being entirely synthetic: a memory of a memory, distilled into liquid form."].map((txt,i)=>(
+          <p key={i} style={{fontFamily:"'DM Sans'",fontSize:15,lineHeight:1.9,color:"rgba(44,44,44,0.8)",margin:"0 0 28px"}}>{txt}</p>
+        ))}
+        <div style={{marginTop:80,paddingTop:40,borderTop:"1px solid rgba(27,61,47,0.08)",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+          <div>
+            <div style={{fontFamily:"'DM Sans'",fontSize:9,color:C.grey,letterSpacing:"0.2em",textTransform:"uppercase",marginBottom:8}}>Next story</div>
+            <span style={{fontFamily:"'Bodoni Moda','Didot',Georgia,serif",fontSize:22,color:C.green,cursor:"pointer"}}>The Coconut Illusion →</span>
+          </div>
+        </div>
+      </section>
+      <Footer/>
+    </div>
+  );
+}
+
+function Footer() {
+  return (
+    <footer style={{padding:"56px 48px",background:C.green,display:"flex",justifyContent:"space-between",alignItems:"flex-end"}}>
+      <div>
+        <div style={{fontFamily:"'Bodoni Moda','Didot',Georgia,serif",fontSize:22,color:C.white,marginBottom:10,letterSpacing:"0.05em",textTransform:"uppercase"}}>Petals</div>
+        <div style={{fontFamily:"'DM Sans'",fontSize:11,color:"rgba(255,255,255,0.35)",letterSpacing:"0.05em"}}>A publication by MG International Fragrance Company</div>
+      </div>
+      <div style={{fontFamily:"'DM Sans'",fontSize:11,color:"rgba(255,255,255,0.35)"}}>
+        <a href="https://gulcicek.com" target="_blank" rel="noopener" style={{color:"rgba(255,255,255,0.5)",textDecoration:"none"}}>gulcicek.com</a>
+        <span style={{margin:"0 16px"}}>·</span><span>Since 1961</span>
+      </div>
+    </footer>
+  );
+}
+
+function App() {
+  const [view,setView]=useState("home");
+  const [detail,setDetail]=useState(null);
+  const ref=React.useRef(null);
+  const [scrollY,setScrollY]=useState(0);
+
+  useEffect(()=>{
+    const el=ref.current;
+    if(!el)return;
+    const h=()=>setScrollY(el.scrollTop);
+    el.addEventListener("scroll",h,{passive:true});
+    return()=>el.removeEventListener("scroll",h);
+  },[]);
+
+  useEffect(()=>{ if(ref.current) ref.current.scrollTop=0; },[view,detail]);
+
+  const goDetail=(a)=>{ setDetail(a); setView("detail"); };
+
+  return (
+    <div ref={ref} style={{width:"100%",height:"100vh",overflow:"auto",background:C.cream}}>
+      <Nav view={view} setView={(v)=>{setView(v);setDetail(null);}} scrollY={scrollY}/>
+      {view==="home"&&<Home goDetail={goDetail}/>}
+      {view==="issues"&&<IssuesPage/>}
+      {view==="pages"&&<PagesView/>}
+      {view==="detail"&&<Detail article={detail} onBack={()=>{setView("home");setDetail(null);}}/>}
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(React.createElement(App));
+</script></body></html>
